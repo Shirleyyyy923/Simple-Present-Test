@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Present Tense Grammar Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f2f2f2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .question {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result {
+            background: #e6ffe6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .history {
+            background: #e6f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .save-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .save-btn {
+            background-color: #2196F3;
+            margin: 5px;
+        }
+        .save-btn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Simple Present Tense Grammar Quiz</h2>
+
+<div class="tabs">
+    <div class="tab active" onclick="showTab('quiz')">做测验</div>
+    <div class="tab" onclick="showTab('history')">查看记录</div>
+</div>
+
+<div id="quiz" class="tab-content active">
+    <form id="quizForm">
+        <label>Name (名字):</label><br>
+        <input type="text" id="name" required><br><br>
+
+        <label>Branch (分院):</label><br>
+        <select id="branch" required>
+            <option value="">Select</option>
+            <option value="Pulai">Pulai</option>
+            <option value="Skudai">Skudai</option>
+        </select><br><br>
+
+        <label>Form (年级):</label><br>
+        <input type="text" id="form" required><br><br>
+
+        <div id="questions"></div>
+
+        <button type="button" onclick="submitQuiz()">提交答案</button>
+        <button type="button" onclick="saveProgress()">保存进度</button>
+        <button type="button" onclick="loadProgress()">加载进度</button>
+    </form>
+
+    <div id="result" class="result hidden"></div>
+</div>
+
+<div id="history" class="tab-content">
+    <h3>你的测验记录</h3>
+    <div id="historyList"></div>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "She ___ to school every day.",
+        options: ["go", "goes", "going", "gone"],
+        answer: "goes",
+        explain: "第三人称单数主语'she'需要动词加's'，'goes'是正确的。",
+        encourage: "第三人称单数的变化掌握得很好！记住要在动词后加-s哦~"
+    },
+    {
+        q: "They ___ football on weekends.",
+        options: ["plays", "play", "playing", "played"],
+        answer: "play",
+        explain: "复数主语'they'用动词原形'play'。",
+        encourage: "复数主语的用法完全正确！你已经理解了基本规则，真棒！"
+    },
+    {
+        q: "My brother ___ TV in the evening.",
+        options: ["watch", "watches", "watching", "watched"],
+        answer: "watches",
+        explain: "第三人称单数'my brother'需要动词加'es'，因为'watch'以'ch'结尾。",
+        encourage: "特殊变化的第三人称单数也做对了！这个细节你也注意到了，观察力真强！"
+    },
+    {
+        q: "Water ___ at 100 degrees Celsius.",
+        options: ["boil", "boils", "boiling", "boiled"],
+        answer: "boils",
+        explain: "表示客观事实或科学真理时，即使主语是不可数名词也要用第三人称单数形式。",
+        encourage: "科学事实的表述完全正确！这个重要语法点你已经掌握啦！"
+    },
+    {
+        q: "I ___ my teeth twice a day.",
+        options: ["brushes", "brush", "brushing", "brushed"],
+        answer: "brush",
+        explain: "第一人称'I'用动词原形'brush'。",
+        encourage: "第一人称的用法完全正确！基本概念你已经理解得很透彻啦！"
+    },
+    {
+        q: "The sun ___ in the east.",
+        options: ["rise", "rises", "rising", "rose"],
+        answer: "rises",
+        explain: "表示自然现象的客观事实，主语'sun'是第三人称单数，动词加's'。",
+        encourage: "自然现象的表述完全正确！你的语法知识很扎实！"
+    },
+    {
+        q: "We ___ English class on Mondays.",
+        options: ["has", "have", "having", "had"],
+        answer: "have",
+        explain: "第一人称复数'we'用动词原形'have'。",
+        encourage: "复数主语的用法完全正确！这个基本规则你已经记住啦！"
+    },
+    {
+        q: "He ___ his homework after dinner.",
+        options: ["do", "does", "doing", "done"],
+        answer: "does",
+        explain: "第三人称单数'he'需要动词加'es'，因为'do'以'o'结尾。",
+        encourage: "特殊变化的第三人称单数也做对了！这种不规则变化你也记住了，真厉害！"
+    },
+    {
+        q: "Cats ___ mice.",
+        options: ["catches", "catch", "catching", "caught"],
+        answer: "catch",
+        explain: "复数主语'cats'用动词原形'catch'。",
+        encourage: "动物习性的表述完全正确！你已经掌握了表示习惯的用法！"
+    },
+    {
+        q: "My mother ___ delicious cookies.",
+        options: ["make", "makes", "making", "made"],
+        answer: "makes",
+        explain: "第三人称单数'my mother'需要动词加's'。",
+        encourage: "家庭成员作为主语的用法完全正确！日常英语的表述很准确！"
+    },
+    {
+        q: "The train ___ at 8:00 every morning.",
+        options: ["leave", "leaves", "leaving", "left"],
+        answer: "leaves",
+        explain: "表示固定时间表的事件，主语'train'是第三人称单数，动词加's'。",
+        encourage: "时间表的表述完全正确！这个实用语法点你已经掌握啦！"
+    },
+    {
+        q: "You ___ very hard for your exams.",
+        options: ["works", "work", "working", "worked"],
+        answer: "work",
+        explain: "第二人称'you'用动词原形'work'。",
+        encourage: "第二人称的用法完全正确！基本语法概念你已经理解得很清楚！"
+    },
+    {
+        q: "It ___ a lot in rainy season.",
+        options: ["rain", "rains", "raining", "rained"],
+        answer: "rains",
+        explain: "表示天气时，用'it'作主语，第三人称单数形式'rains'。",
+        encourage: "天气的表述完全正确！非人称主语的用法掌握得很好！"
+    },
+    {
+        q: "Birds ___ south for the winter.",
+        options: ["flys", "fly", "flies", "flying"],
+        answer: "fly",
+        explain: "复数主语'birds'用动词原形'fly'。",
+        encourage: "动物迁徙的表述完全正确！你已经掌握了表示习惯性动作的用法！"
+    },
+    {
+        q: "She ___ three languages fluently.",
+        options: ["speak", "speaks", "speaking", "spoken"],
+        answer: "speaks",
+        explain: "第三人称单数'she'需要动词加's'。",
+        encourage: "语言能力的表述完全正确！第三人称单数的变化你已经很熟练啦！"
+    },
+    {
+        q: "The Earth ___ around the Sun.",
+        options: ["move", "moves", "moving", "moved"],
+        answer: "moves",
+        explain: "表示科学事实，主语'Earth'是第三人称单数，动词加's'。",
+        encourage: "科学事实的表述完全正确！这个重要语法点你已经掌握啦！"
+    },
+    {
+        q: "They ___ to music on their way to school.",
+        options: ["listens", "listen", "listening", "listened"],
+        answer: "listen",
+        explain: "复数主语'they'用动词原形'listen'。",
+        encourage: "日常习惯的表述完全正确！复数主语的用法你已经很熟悉啦！"
+    },
+    {
+        q: "A doctor ___ sick people.",
+        options: ["help", "helps", "helping", "helped"],
+        answer: "helps",
+        explain: "表示职业的一般行为，单数主语'doctor'需要动词加's'。",
+        encourage: "职业行为的表述完全正确！你已经掌握了表示普遍真理的用法！"
+    },
+    {
+        q: "We ___ our grandparents every Sunday.",
+        options: ["visits", "visit", "visiting", "visited"],
+        answer: "visit",
+        explain: "第一人称复数'we'用动词原形'visit'。",
+        encourage: "家庭活动的表述完全正确！复数主语的用法你已经掌握得很好了！"
+    },
+    {
+        q: "He ___ to be a scientist when he grows up.",
+        options: ["want", "wants", "wanting", "wanted"],
+        answer: "wants",
+        explain: "第三人称单数'he'需要动词加's'。",
+        encourage: "未来愿望的表述完全正确！你已经掌握了表示长期愿望的用法！"
+    }
+];
+
+function showTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Deactivate all tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabId).classList.add('active');
+    
+    // Activate selected tab
+    event.currentTarget.classList.add('active');
+    
+    // If history tab is selected, load history
+    if (tabId === 'history') {
+        loadHistory();
+    }
+}
+
+function submitQuiz() {
+    const name = document.getElementById('name').value;
+    const branch = document.getElementById('branch').value;
+    const form = document.getElementById('form').value;
+    
+    if (!name || !branch || !form) {
+        alert("请填写完整的个人信息！");
+        return;
+    }
+    
+    let score = 0;
+    let results = [];
+    let unanswered = 0;
+    
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        const isCorrect = selected && selected.value === q.answer;
+        
+        if (isCorrect) score++;
+        if (!selected) unanswered++;
+        
+        results.push({
+            question: q.q,
+            selected: selected ? selected.value : "未作答",
+            correct: q.answer,
+            isCorrect: isCorrect,
+            explain: q.explain,
+            encourage: q.encourage
+        });
+    });
+    
+    // Save the attempt to history
+    saveAttempt(name, branch, form, score, results);
+    
+    // Display results
+    displayResults(name, branch, form, score, results, unanswered);
+}
+
+function displayResults(name, branch, form, score, results, unanswered) {
+    let output = `
+        <h3>名字: ${name}</h3>
+        <h3>分院: ${branch}</h3>
+        <h3>年级: ${form}</h3>
+        <h3>得分: <span class="${score >= 15 ? 'correct' : 'incorrect'}">${score} / 20</span></h3>
+        ${unanswered > 0 ? `<p>注意：你有 ${unanswered} 题没有作答</p>` : ''}
+        <p>${getFeedback(score)}</p>
+        <hr>
+    `;
+    
+    results.forEach((r, index) => {
+        output += `
+            <div class="question">
+                <p><strong>第${index + 1}题：${r.isCorrect ? '正确 ✅' : '错误 ❌'}</strong></p>
+                <p>题目: ${r.question}</p>
+                ${!r.isCorrect ? `<p>你的答案: <span class="incorrect">${r.selected}</span></p>` : ''}
+                <p>正确答案: <span class="correct">${r.correct}</span></p>
+                <p>解释: ${r.explain}</p>
+                <p>鼓励: ${r.encourage}</p>
+            </div>
+        `;
+    });
+    
+    document.getElementById('result').innerHTML = output;
+    document.getElementById('result').classList.remove('hidden');
+    
+    // Scroll to results
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getFeedback(score) {
+    if (score === 20) {
+        return "太厉害啦！全对耶！你的一般现在时用得跟母语者一样棒！🎉 给自己点个赞吧！";
+    } else if (score >= 17) {
+        return "成绩很不错哦！只有几个小地方需要注意，你已经掌握大部分内容啦！✨";
+    } else if (score >= 14) {
+        return "挺好的！基本要点都掌握了，错题看看解释，下次会更好哒！😊";
+    } else if (score >= 10) {
+        return "有进步空间哦！错题都是学习机会，慢慢来，你会越来越棒的！💪";
+    } else {
+        return "第一次做这样的题吧？别担心！每个人都是这样进步的，多做几次就会好很多啦！🌱";
+    }
+}
+
+function saveAttempt(name, branch, form, score, results) {
+    const attempts = JSON.parse(localStorage.getItem('pronounQuizAttempts') || '[]');
+    const attempt = {
+        date: new Date().toLocaleString(),
+        name,
+        branch,
+        form,
+        score,
+        results
+    };
+    
+    attempts.unshift(attempt); // Add new attempt at beginning
+    localStorage.setItem('pronounQuizAttempts', JSON.stringify(attempts));
+}
+
+function loadHistory() {
+    const attempts = JSON.parse(localStorage.getItem('pronounQuizAttempts') || '[]');
+    const historyList = document.getElementById('historyList');
+    
+    if (attempts.length === 0) {
+        historyList.innerHTML = "<p>你还没有任何测验记录，快去做测验吧！</p>";
+        return;
+    }
+    
+    let html = "";
+    attempts.forEach((attempt, index) => {
+        html += `
+            <div class="question" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px;">
+                <h3>测验 #${index + 1} - ${attempt.date}</h3>
+                <p>姓名: ${attempt.name} | 分院: ${attempt.branch} | 年级: ${attempt.form}</p>
+                <p>得分: <strong>${attempt.score} / 20</strong></p>
+                <button onclick="viewAttemptDetails(${index})">查看详情</button>
+                <div id="attemptDetails${index}" style="display: none; margin-top: 10px;">
+                    ${attempt.results.map((r, qIndex) => `
+                        <div style="margin-bottom: 15px; padding: 10px; background: ${r.isCorrect ? '#e6ffe6' : '#ffe6e6'}; border-radius: 5px;">
+                            <p><strong>第${qIndex + 1}题：${r.isCorrect ? '正确 ✅' : '错误 ❌'}</strong></p>
+                            <p>题目: ${r.question}</p>
+                            ${!r.isCorrect ? `<p>你的答案: ${r.selected}</p>` : ''}
+                            <p>正确答案: ${r.correct}</p>
+                            <p>解释: ${r.explain}</p>
+                            <p>鼓励: ${r.encourage}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    historyList.innerHTML = html;
+}
+
+function viewAttemptDetails(index) {
+    const detailsDiv = document.getElementById(`attemptDetails${index}`);
+    if (detailsDiv.style.display === 'none') {
+        detailsDiv.style.display = 'block';
+    } else {
+        detailsDiv.style.display = 'none';
+    }
+}
+
+function saveProgress() {
+    const name = document.getElementById('name').value;
+    const branch = document.getElementById('branch').value;
+    const form = document.getElementById('form').value;
+    
+    if (!name || !branch || !form) {
+        alert("请先填写个人信息！");
+        return;
+    }
+    
+    const progress = {
+        name,
+        branch,
+        form,
+        answers: []
+    };
+    
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        progress.answers.push(selected ? selected.value : null);
+    });
+    
+    localStorage.setItem('pronounQuizProgress', JSON.stringify(progress));
+    alert("进度已保存！你可以稍后回来继续完成测验。");
+}
+
+function loadProgress() {
+    const progress = JSON.parse(localStorage.getItem('pronounQuizProgress'));
+    
+    if (!progress) {
+        alert("没有找到保存的进度！");
+        return;
+    }
+    
+    document.getElementById('name').value = progress.name;
+    document.getElementById('branch').value = progress.branch;
+    document.getElementById('form').value = progress.form;
+    
+    progress.answers.forEach((answer, index) => {
+        if (answer) {
+            const radio = document.querySelector(`input[name="q${index}"][value="${answer}"]`);
+            if (radio) radio.checked = true;
+        }
+    });
+    
+    alert("进度已加载！你可以继续完成测验。");
+}
+
+window.onload = function() {
+    const qDiv = document.getElementById('questions');
+    questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.className = "question";
+        div.innerHTML = `<p><strong>第${index + 1}题.</strong> ${q.q}</p>` +
+                        q.options.map(opt => `
+                            <label><input type="radio" name="q${index}" value="${opt}"> ${opt}</label><br>
+                        `).join('');
+        qDiv.appendChild(div);
+    });
+    
+    // Check if there's saved progress
+    if (localStorage.getItem('pronounQuizProgress')) {
+        if (confirm("检测到有保存的进度，是否加载？")) {
+            loadProgress();
+        }
+    }
+}
+</script>
+
+</body>
+</html>
